@@ -77,7 +77,7 @@ function customerOptions() {
         name: "customerOptions",
         type: "list",
         message: "\n\nWhat would you like to do right now?",
-        choices: ["See your purchase history", "Go Shopping"]
+        choices: ["See your purchase history", "Go Shopping","Go Home"]
     })
 
         .then(function (answer) {
@@ -87,11 +87,16 @@ function customerOptions() {
 
                 // recordOfPurchases()
 
-            } else {
+            } else if (answer.customerOptions === "Go Shopping") 
+            
+            {
 
 
                 itemsDesired();
 
+            } else {
+
+               // connection.end();
             }
         })
 }
@@ -166,4 +171,33 @@ function itemsDesired() {
             }
 
         })
+}
+
+function payment() {
+
+console.log("your order is to buy x of x at x number");
+
+    inquirer.prompt({
+
+        name: "confirmOrder",
+        type: "list",
+        message: "Would you like to go forward with this order",
+        choices: ["Yes", "no"]
+    })
+
+        .then(function (answer) {
+            if (answer.confirmOrder === "Yes"){
+            console.log("Great we have now magically taken x from you and in 10-15 business days you will receive your _______. Your order has been documented in purchase history.")
+
+            //document purchase - in purchase history - in inventory - in sales. 
+
+            } else {
+
+                console.log("Sorry that you have decided not to purchase the_______. They are very popular. For now we will return you to the main menu ")
+
+            }
+
+
+
+})
 }
