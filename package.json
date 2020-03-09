@@ -1,0 +1,23 @@
+{
+  "name": "onlinestore",
+  "version": "1.0.0",
+  "description": "This is an Online Store Front made with Node.JS &amp; MYSQL. The app will takes in orders from customers which then depletes stock from the store's inventory. The app tracks product sales across the store's departments and provides a summary of the highest-grossing departments in the store.",
+  "main": "store.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattkrebs1974/OnlineStore.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattkrebs1974/OnlineStore/issues"
+  },
+  "homepage": "https://github.com/mattkrebs1974/OnlineStore#readme",
+  "dependencies": {
+    "inquirer": "^7.0.6",
+    "mysql": "^2.18.1"
+  }
+}
