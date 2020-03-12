@@ -311,7 +311,7 @@ function register() {
         });
 }
 
-function getIdNumber(GETIDN){
+function getIdNumber(){
 
 var getID = "SELECT Cust_ID from Customer_Id ORDER BY Cust_ID DESC LIMIT 1;"
 
@@ -324,8 +324,10 @@ var getID = "SELECT Cust_ID from Customer_Id ORDER BY Cust_ID DESC LIMIT 1;"
 else {
 
     var IdNUMBER = res.Cust_ID;
+
+    console.log(res[0].Cust_ID);
             
-    
+
     console.log("ID " + IdNUMBER);
     console.log("ID2" + res);
  
