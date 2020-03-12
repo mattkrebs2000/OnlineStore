@@ -46,9 +46,8 @@ function introductions() {
 
                 case "Customer":
                     console.log("\n\nThank You for Visiting us today!\n");
-
-                    customerOptions();
-                    // customerDocumentation();
+                    
+                    newOrReturningCustomer();
                     break;
 
                 case "Supervisor":
@@ -85,9 +84,7 @@ function managerOptions() {
                     console.log("\n\nOK lets take a look to see what is on our shelves!\n\n");
                     seeWhatsOnTheShelves();
                     break;
-
                 case "Consider Restocking":
-
                     checkStock();
                     break;
 
@@ -215,7 +212,7 @@ function checkStock() {
 
                                     console.log("\n\nOK you've restocked those items that needed it.\n\n")
                                    
-                                    managerOptions();
+                                    customerOptions();
                                 })
 
 
@@ -226,7 +223,7 @@ function checkStock() {
 
                     }
                 }
-                console.log("OK based on the threshold that you have set we currently have plenty on the shelves. ")
+                
             })
 
 
@@ -248,49 +245,137 @@ function checkStock() {
 }
 
 
+function newOrReturningCustomer () {
+
+        inquirer.prompt({
+
+            name: "newOrReturning",
+            type: "list",
+            message: "\n\nAre you a new or Returning Customer?",
+            choices: ["New Customer", "Returning Customer"]
+        })
+
+            .then(function (answer) {
+                switch (answer.newOrReturning) {
+
+                    case "New Customer":
+                        console.log("\n\nWelcome!\n\n");
+                        register();
+                        break;
+
+                    case "Returning Customer":
+                        console.log("\n\nWelcome Back!\n\n");
+                        signIn();
+                        //remember to visits ++
+                        break;
+
+                }
+            });
+    }
+
+
+
+function register() {
+
+// delete customers 
+//DELETE FROM Customer_ID WHERE Cust_ID > 1;
+
+    inquirer.prompt({
+
+        name: "register",
+        type: "input",
+        message: "\n\nWhat is your Name?",
+    })
+
+        .then(function (answer) {
+
+            var name = answer.register;
+
+            var registerName = "INSERT INTO Customer_Id VALUES (default, '" + name + "', 1)"
+
+            connection.query(registerName, function (err, result) {
+                if (err) throw err;
+
+                else {
+
+                    getIdNumber();
+
+
+               
+
+
+            }
+            })
+
+        
+        });
+}
+
+function getIdNumber(GETIDN){
+
+var getID = "SELECT Cust_ID from Customer_Id ORDER BY Cust_ID DESC LIMIT 1;"
 
 
 
 
+    connection.query(getID, function (err, res) {
+        if (err) throw err;
 
-// function customerDocumentation() {
+else {
 
-//     inquirer.prompt([
-//         {
-//             name: "nameOfVisitor",
-//             type: "input",
-//             message: "please enter your name"
-//         },
-//         {
-//             name: "addressOfVisitor",
-//             type: "input",
-//             message: "please enter your address"
-//         }
-//     ])
-//         .then(function (answer) {
+    var IdNUMBER = res.Cust_ID;
+            
+    
+    console.log("ID " + IdNUMBER);
+    console.log("ID2" + res);
+ 
+        console.log("\n\nYour CustomerID Number is " + res + ".\n\n To log in to your account in the future \n\nyou must type in your name (as  you entered it) and your given CustoemrID number");
+    }
+  
 
-//             //check information against users logged in mysql
-
-//             if (answer.nameOfVisitor === "a name in customer list" && answer.addressOfVisitor === "") {
-//                 console.log("\n\nWelcome Back!\n\n")
-
-//                 customerOptions()
-
-//             } else {
-
-//                 //log information into users file in mysql
-
-//                 console.log("\n\nWe see that your address and name is not an exact match.\n\n We will add your information to our files\n\n")
-
-//                 customerOptions()
-//             }
+    customerOptions();
+})
+}
 
 
+function customerDocumentation() {
 
-//         })
+    inquirer.prompt([
+        {
+            name: "nameOfVisitor",
+            type: "input",
+            message: "please enter your name"
+        },
+        {
+            name: "addressOfVisitor",
+            type: "input",
+            message: "please enter your address"
+        }
+    ])
+        .then(function (answer) {
+
+            //check information against users logged in mysql
+
+            if (answer.nameOfVisitor === "a name in customer list" && answer.addressOfVisitor === "") {
+                console.log("\n\nWelcome Back!\n\n")
+
+                customerOptions()
+
+            } else {
+
+                //log information into users file in mysql
+
+                console.log("\n\nWe see that your address and name is not an exact match.\n\n We will add your information to our files\n\n")
+
+                customerOptions()
+            }
 
 
-// }
+
+        })
+
+
+}
 
 // function itemsDesired() {
 //     inquirer.prompt([{
@@ -358,26 +443,26 @@ function checkStock() {
 
 // }
 
-function maximumAmount() {
-    inquirer.prompt({
-        name: "maximumAmountOnShelves",
-        type: "list",
-        message: "\n\n In terms of quantity of Items (in stock) what is your limit on the high end?",
-        choices: [14, 15, 16, 17, 18, 19, 20]
-    })
+// function maximumAmount() {
+//     inquirer.prompt({
+//         name: "maximumAmountOnShelves",
+//         type: "list",
+//         message: "\n\n In terms of quantity of Items (in stock) what is your limit on the high end?",
+//         choices: [14, 15, 16, 17, 18, 19, 20]
+//     })
 
-        .then(function (answer) {
-            var highthreshold = answer.maximumAmountOnShelves;
-
-
-            console.log(highthreshold);
-
-            console.log("\n\nOK lets check to see if any of our items \n\n are below that threshold and need to be restocked");
+//         .then(function (answer) {
+//             var highthreshold = answer.maximumAmountOnShelves;
 
 
+//             console.log(highthreshold);
 
-        })
-}
+//             console.log("\n\nOK lets check to see if any of our items \n\n are below that threshold and need to be restocked");
+
+
+
+//         })
+// }
 
 
 
@@ -445,4 +530,6 @@ function maximumAmount() {
 //                 console.log("OK based on the threshold that you have set we currently have plenty on the shelves. ")
          
 //  })
+
+
 

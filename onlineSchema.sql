@@ -14,3 +14,10 @@ CREATE TABLE SalesTable
     Total_Sales DECIMAL (10,3),
     PRIMARY KEY (Product_ID)
 );
+
+CREATE TABLE Customer_Id
+(
+    Cust_ID INTEGER AUTO_INCREMENT,
+    Name VARCHAR (40),
+    PRIMARY KEY (Cust_ID)
+);
