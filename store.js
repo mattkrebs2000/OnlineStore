@@ -1,5 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var name = "";
+var ID_NUMBER
 
 
 var connection = mysql.createConnection({
@@ -120,7 +122,8 @@ function customerOptions() {
 
                 case "Go Shopping":
                     console.log("\n\nOK Let's go shopping!\n\n");
-                    seeWhatsOnTheShelves();
+                    setTimeout(seeWhatsOnTheShelves,3000);
+                    
                     break;
 
                 case "Go Home":
@@ -134,7 +137,7 @@ function customerOptions() {
 
 function seeWhatsOnTheShelves() {
 
-    var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
+   var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
     console.log("\x1b[44m%s\x1b[0m", "Items For Sale");
     connection.query(query, function (err, res) {
         if (err) throw err;
@@ -142,16 +145,21 @@ function seeWhatsOnTheShelves() {
         for (var i = 0; i < res.length; i++) {
 
 
-            console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+            console.log("\x1b[44m%s\x1b[0m", res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+
+         
         }
+console.log(name);
 
-
+        shop();
 
     });
 
-    managerOptions()
+    }
 
-}
+    // managerOptions()
+
+
 
 //                 itemsDesired();
 
@@ -277,8 +285,8 @@ function newOrReturningCustomer () {
 
 function register() {
 
-// delete customers 
-//DELETE FROM Customer_ID WHERE Cust_ID > 1;
+// directions ------ delete customers 
+//DELETE FROM Customer_Id WHERE Cust_ID > 1;
 
     inquirer.prompt({
 
@@ -289,7 +297,7 @@ function register() {
 
         .then(function (answer) {
 
-            var name = answer.register;
+            name = answer.register;
 
             var registerName = "INSERT INTO Customer_Id VALUES (default, '" + name + "', 1)"
 
@@ -298,47 +306,36 @@ function register() {
 
                 else {
 
-                    getIdNumber();
+                    var getID = "SELECT Cust_ID from Customer_Id ORDER BY Cust_ID DESC LIMIT 1;"
+
+                    connection.query(getID, function (err, res) {
+                        if (err) throw err;
+
+                        else {
+                            
+                            ID_NUMBER = res[0].Cust_ID
+                            console.log("ID " +ID_NUMBER);
+
+                            console.log("\n\nOK " + name + " your CustomerID Number is " + ID_NUMBER + ".\n\n To log in to your account in the future \n\nyou must type in your name (as  you entered it) and your given CustoemrID number");
+                        }
+                    })
+
+                 setTimeout(customerOptions,4000);
 
 
-               
 
+                    
 
             }
+           
             })
 
-        
+       
         });
+       
 }
 
-function getIdNumber(){
-
-var getID = "SELECT Cust_ID from Customer_Id ORDER BY Cust_ID DESC LIMIT 1;"
-
-
-
-
-    connection.query(getID, function (err, res) {
-        if (err) throw err;
-
-else {
-
-    var IdNUMBER = res.Cust_ID;
-
-    console.log(res[0].Cust_ID);
-            
-
-    console.log("ID " + IdNUMBER);
-    console.log("ID2" + res);
- 
-        console.log("\n\nYour CustomerID Number is " + res + ".\n\n To log in to your account in the future \n\nyou must type in your name (as  you entered it) and your given CustoemrID number");
-    }
-  
-
-    customerOptions();
-})
-}
-
+    
 
 function customerDocumentation() {
 
@@ -535,3 +532,110 @@ function customerDocumentation() {
 
 
 
+function shop(){
+
+// to delete rows do the following:
+//DELETE FROM Orders WHERE Cust_ID > 1;
+
+    connection.query("SELECT * FROM SalesTable", function(err,results){
+        if (err) throw err;
+    
+inquirer.prompt([
+    {
+        name:"whatYouAreBuying",
+        type:"rawlist",
+        choices: function() {
+            var choiceArray =[];
+            for (var i=0; i<results.length; i++){
+                choiceArray.push(results[i].Items_For_Sale);
+            }
+                return choiceArray;
+        },
+        message: "Which item would you like to buy?"
+    },
+    {
+        name:"Quantity",
+        type:"input",
+        message: "How many would you like to buy?"
+
+    }
+])
+.then(function(answer){
+
+    var chosenItem;
+    for (var i = 0; i < results.length; i++) {
+        if (results[i].Items_For_Sale === answer.whatYouAreBuying) {
+            chosenItem = results[i];
+        }
+    }
+
+if (chosenItem.Quantity_Available >= parseInt (answer.Quantity)) {
+
+    var costOfPurchase = (parseInt(answer.Quantity)) * (parseFloat(chosenItem.Price_Per_Item));
+
+    var roundedCost = (Math.round(costOfPurchase * 100)/(100));
+
+    console.log("quantity "+parseInt(answer.Quantity))
+    console.log("price " + parseFloat(chosenItem.Price_Per_Item))
+
+    console.log("OK you are purchasing " + answer.Quantity + " " + answer.whatYouAreBuying + " for a total of " + roundedCost);
+
+connection.query(
+    "INSERT INTO Orders SET ?",
+
+    {
+       
+        Buyer_ID: ID_NUMBER,
+        Buyer:name,
+        Catergory: chosenItem.Catergory,
+        Item:answer.whatYouAreBuying,
+        Price_Per_Item:chosenItem.Price_Per_Item,
+        Quantity:answer.Quantity,
+        TotalCost:roundedCost
+   
+    },
+
+
+    function (err) {
+        if (err) throw err;
+    
+    }
+    )
+
+
+    connection.query(
+        "UPDATE SalesTable SET ? WHERE Product_ID="+chosenItem.Product_ID,
+        {
+            Items_Sold: chosenItem.Items_Sold + answer.Quantity,
+            Total_Sales: chosenItem.Total_Sales + roundedCost
+        },
+
+
+        function (err) {
+            if (err) throw err;
+            console.log("You've just purchased " + answer.Quantity + " " + answer.whatYouAreBuying);
+
+
+        }
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+} else {
+
+
+    "You aint buying shit!"
+}
+
+});
+    });
+}

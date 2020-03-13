@@ -15,9 +15,24 @@ CREATE TABLE SalesTable
     PRIMARY KEY (Product_ID)
 );
 
+USE Storefront_DB;
+
 CREATE TABLE Customer_Id
 (
-    Cust_ID INTEGER AUTO_INCREMENT,
-    Name VARCHAR (40),
+    Cust_ID INTEGER,
+    NAME VARCHAR (30),
     PRIMARY KEY (Cust_ID)
 );
+
+CREATE TABLE Orders
+(
+Order_Id INTEGER,
+Buyer_ID INTEGER (5),
+Buyer VARCHAR (30),
+Catergory VARCHAR (30),
+Item VARCHAR (30),
+Price_Per_Item DECIMAL (10,2),
+Quantity INTEGER (5),
+TotalCost DECIMAL(10,2)
+PRIMARY KEY (Order_Id)
+)
