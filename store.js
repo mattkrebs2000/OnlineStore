@@ -100,7 +100,7 @@ function managerOptions() {
                     break;
 
                 case "Go Home":
-                    console.log("\n\nYou just got here!!")
+                    console.log("\n\nYou just got here!!\n\n")
 
 
                     setTimeout(leave, 2000);
@@ -450,9 +450,8 @@ function register() {
                         else {
 
                             ID_NUMBER = res[0].Cust_ID
-                            console.log("ID " + ID_NUMBER);
 
-                            console.log("\n\nOK " + name + " your CustomerID Number is " + ID_NUMBER + ".\n\n To log in to your account in the future \n\nyou must type in your name (as  you entered it) and your given CustoemrID number");
+                            console.log("\n\nOK " + name + " your Customer ID Number is " + ID_NUMBER + ".\n\nTo log in to your account in the future \n\nYou must type in your name (as  you entered it) \n\nAnd your given CustoemrID number");
                         }
                     })
 
@@ -767,7 +766,7 @@ function shop() {
 
 
 
-                    console.log("\n\nOK you are purchasing " + answer.Quantity + " " + answer.whatYouAreBuying + " (at: $" + parseFloat(chosenItem.Price_Per_Item) + " each) for a total of $" + roundedCost);
+                    console.log("\n\nOK you are purchasing " + answer.Quantity + " " + answer.whatYouAreBuying + "\n (at: $" + parseFloat(chosenItem.Price_Per_Item) + " each) for a total of $" + roundedCost + ".");
 
                     connection.query(
                         "INSERT INTO Orders SET ?",
