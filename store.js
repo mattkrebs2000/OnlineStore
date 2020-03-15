@@ -1,7 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var name = "";
-var ID_NUMBER
+var ID_NUMBER;
+var NumberOfVisits;
 
 
 var connection = mysql.createConnection({
@@ -48,7 +49,7 @@ function introductions() {
 
                 case "Customer":
                     console.log("\n\nThank You for Visiting us today!\n");
-                    
+
                     newOrReturningCustomer();
                     break;
 
@@ -118,12 +119,13 @@ function customerOptions() {
 
                 case "See your purchase history":
                     console.log("\n\nOK lets take a look to see what you have purchased so far!\n\n");
+                    setTimeout(purchaseHistory, 3000);
                     break;
 
                 case "Go Shopping":
                     console.log("\n\nOK Let's go shopping!\n\n");
-                    setTimeout(seeWhatsOnTheShelves,3000);
-                    
+                    setTimeout(seeWhatsOnTheShelves, 1500);
+
                     break;
 
                 case "Go Home":
@@ -135,29 +137,56 @@ function customerOptions() {
         });
 }
 
+function purchaseHistory() {
+
+
+    var query = "SELECT * FROM Orders WHERE Buyer = '" + name + "' and Buyer_ID = " + ID_NUMBER;
+
+
+
+
+    console.log("\x1b[44m%s\x1b[0m", "Your Purchase History");
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        if (res.length > 0) {
+
+            for (var i = 0; i < res.length; i++) {
+                console.log("\x1b[44m%s\x1b[0m", res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+            }
+        } else {
+            console.log("\x1b[44m%s\x1b[0m", "You haven't purchased anyting yet. ")
+        }
+
+
+
+
+    })
+
+
+    setTimeout(customerOptions, 6000);
+}
+
+
+
 function seeWhatsOnTheShelves() {
 
-   var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
+    var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
     console.log("\x1b[44m%s\x1b[0m", "Items For Sale");
     connection.query(query, function (err, res) {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
-
-
             console.log("\x1b[44m%s\x1b[0m", res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
-
-         
         }
-console.log(name);
+
 
         shop();
 
     });
 
-    }
+}
 
-    // managerOptions()
+// managerOptions()
 
 
 
@@ -201,7 +230,7 @@ function checkStock() {
 
                             .then(function (answer) {
                                 var highthreshold = answer.maximumAmountOnShelves;
-                               
+
 
 
                                 console.log(highthreshold);
@@ -216,10 +245,10 @@ function checkStock() {
                                 connection.query(nextquery, function (err, result) {
                                     if (err) throw err;
 
-                                  
+
 
                                     console.log("\n\nOK you've restocked those items that needed it.\n\n")
-                                   
+
                                     customerOptions();
                                 })
 
@@ -231,7 +260,7 @@ function checkStock() {
 
                     }
                 }
-                
+
             })
 
 
@@ -253,40 +282,39 @@ function checkStock() {
 }
 
 
-function newOrReturningCustomer () {
+function newOrReturningCustomer() {
 
-        inquirer.prompt({
+    inquirer.prompt({
 
-            name: "newOrReturning",
-            type: "list",
-            message: "\n\nAre you a new or Returning Customer?",
-            choices: ["New Customer", "Returning Customer"]
-        })
+        name: "newOrReturning",
+        type: "list",
+        message: "\n\nAre you a new or Returning Customer?",
+        choices: ["New Customer", "Returning Customer"]
+    })
 
-            .then(function (answer) {
-                switch (answer.newOrReturning) {
+        .then(function (answer) {
+            switch (answer.newOrReturning) {
 
-                    case "New Customer":
-                        console.log("\n\nWelcome!\n\n");
-                        register();
-                        break;
+                case "New Customer":
+                    console.log("\n\nWelcome!\n\n");
+                    register();
+                    break;
 
-                    case "Returning Customer":
-                        console.log("\n\nWelcome Back!\n\n");
-                        signIn();
-                        //remember to visits ++
-                        break;
+                case "Returning Customer":
+                    console.log("\n\nWelcome Back!\n\n");
+                    signIn();
+                    //remember to visits ++
+                    break;
 
-                }
-            });
-    }
-
+            }
+        });
+}
 
 
 function register() {
 
-// directions ------ delete customers 
-//DELETE FROM Customer_Id WHERE Cust_ID > 1;
+    // directions ------ delete customers 
+    //DELETE FROM Customer_Id WHERE Cust_ID > 1;
 
     inquirer.prompt({
 
@@ -312,67 +340,114 @@ function register() {
                         if (err) throw err;
 
                         else {
-                            
+
                             ID_NUMBER = res[0].Cust_ID
-                            console.log("ID " +ID_NUMBER);
+                            console.log("ID " + ID_NUMBER);
 
                             console.log("\n\nOK " + name + " your CustomerID Number is " + ID_NUMBER + ".\n\n To log in to your account in the future \n\nyou must type in your name (as  you entered it) and your given CustoemrID number");
                         }
                     })
 
-                 setTimeout(customerOptions,4000);
+                    setTimeout(customerOptions, 4000);
 
+                }
 
-
-                    
-
-            }
-           
             })
 
-       
+
         });
-       
+
 }
 
-    
 
-function customerDocumentation() {
+
+function signIn() {
+    // Ask person to provide their username and password when it is confirmed set name== to what they have typed set ID = to what they have typed add 1 to the number of visits. If it cannot be found --- your information cannot be found send them to register. Once signed in --- got to customeroptions(). 
+
 
     inquirer.prompt([
         {
             name: "nameOfVisitor",
             type: "input",
-            message: "please enter your name"
+            message: "please enter your name (as you entered it when you first registered)"
         },
         {
-            name: "addressOfVisitor",
+            name: "IdNumber",
             type: "input",
-            message: "please enter your address"
+            message: "please enter your given ID number"
         }
     ])
         .then(function (answer) {
 
-            //check information against users logged in mysql
-
-            if (answer.nameOfVisitor === "a name in customer list" && answer.addressOfVisitor === "") {
-                console.log("\n\nWelcome Back!\n\n")
-
-                customerOptions()
-
-            } else {
-
-                //log information into users file in mysql
-
-                console.log("\n\nWe see that your address and name is not an exact match.\n\n We will add your information to our files\n\n")
-
-                customerOptions()
-            }
+            name = answer.nameOfVisitor;
+            ID_NUMBER = answer.IdNumber;
 
 
+
+            var isRegistered = "SELECT Visits FROM Customer_Id WHERE Cust_ID = ? AND name = ?";
+
+
+            connection.query(isRegistered, [ID_NUMBER, name], function (err, res) {
+                if (err) {
+                    console.log(err);
+                }
+                else if (res[0]) {
+
+
+                    var updateVisits = "UPDATE Customer_Id SET Visits = (Visits + 1) WHERE Name = '" + name + "' and Cust_ID = " + ID_NUMBER;
+
+                    connection.query(updateVisits, function (err, result) {
+                        if (err) throw err;
+
+                        setTimeout(customerOptions, 2000);
+                    })
+
+                }
+                else {
+
+
+                    console.log("\n\nWe can't find a match with the combination of '" + name + "' and '" + ID_NUMBER + "'.\n\nHowever, we can re-register you right now.");
+
+                    var reRegisterName = "INSERT INTO Customer_Id VALUES (default, '" + name + "', 1)"
+
+                    connection.query(reRegisterName, function (err, result) {
+                        if (err) throw err;
+
+
+                        var getID = "SELECT Cust_ID from Customer_Id ORDER BY Cust_ID DESC LIMIT 1;"
+
+                        connection.query(getID, function (err, res) {
+                            if (err) throw err;
+
+                            else {
+
+                                ID_NUMBER = res[0].Cust_ID
+
+
+                                function notice() {
+                                    console.log("\n\nOK " + name + " your Customer ID Number is now " + ID_NUMBER + ".\n\nTo log in to your account in the future, \n\nyou must type in your name (as you entered it) \n\nAnd your given Custoemr ID number.");
+                                }
+
+                                setTimeout(notice, 5000);
+
+                            }
+                        })
+
+
+
+
+
+
+
+
+                        setTimeout(customerOptions, 14000);
+                    })
+
+                }
+
+            })
 
         })
-
 
 }
 
@@ -525,117 +600,126 @@ function customerDocumentation() {
 //                             } else {
 
 //                             }
-                
+
 //                 console.log("OK based on the threshold that you have set we currently have plenty on the shelves. ")
-         
+
 //  })
 
 
 
-function shop(){
+function shop() {
 
-// to delete rows do the following:
-//DELETE FROM Orders WHERE Cust_ID > 1;
+    // to delete rows do the following:
+    //DELETE FROM Orders WHERE Cust_ID > 1;
 
-    connection.query("SELECT * FROM SalesTable", function(err,results){
+    connection.query("SELECT * FROM SalesTable", function (err, results) {
         if (err) throw err;
-    
-inquirer.prompt([
-    {
-        name:"whatYouAreBuying",
-        type:"rawlist",
-        choices: function() {
-            var choiceArray =[];
-            for (var i=0; i<results.length; i++){
-                choiceArray.push(results[i].Items_For_Sale);
+
+        inquirer.prompt([
+            {
+                name: "whatYouAreBuying",
+                type: "rawlist",
+                choices: function () {
+                    var choiceArray = [];
+                    for (var i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].Items_For_Sale);
+                    }
+                    return choiceArray;
+                },
+                message: "Which item would you like to buy?"
+            },
+            {
+                name: "Quantity",
+                type: "input",
+                message: "How many would you like to buy?"
+
             }
-                return choiceArray;
-        },
-        message: "Which item would you like to buy?"
-    },
-    {
-        name:"Quantity",
-        type:"input",
-        message: "How many would you like to buy?"
+        ])
+            .then(function (answer) {
 
-    }
-])
-.then(function(answer){
+                var chosenItem;
+                for (var i = 0; i < results.length; i++) {
+                    if (results[i].Items_For_Sale === answer.whatYouAreBuying) {
+                        chosenItem = results[i];
+                    }
+                }
 
-    var chosenItem;
-    for (var i = 0; i < results.length; i++) {
-        if (results[i].Items_For_Sale === answer.whatYouAreBuying) {
-            chosenItem = results[i];
-        }
-    }
+                if (chosenItem.Quantity_Available < parseInt(answer.Quantity)) {
 
-if (chosenItem.Quantity_Available >= parseInt (answer.Quantity)) {
+                    console.log("\n\nSorry we don't have enough inventory to fill this order! Please resubmit your order.\n\n")
 
-    var costOfPurchase = (parseInt(answer.Quantity)) * (parseFloat(chosenItem.Price_Per_Item));
+                    setTimeout(seeWhatsOnTheShelves,2500);
+                  
 
-    var roundedCost = (Math.round(costOfPurchase * 100)/(100));
+                } else {
 
-    console.log("quantity "+parseInt(answer.Quantity))
-    console.log("price " + parseFloat(chosenItem.Price_Per_Item))
+                    var costOfPurchase = (parseInt(answer.Quantity)) * (parseFloat(chosenItem.Price_Per_Item));
 
-    console.log("OK you are purchasing " + answer.Quantity + " " + answer.whatYouAreBuying + " for a total of " + roundedCost);
-
-connection.query(
-    "INSERT INTO Orders SET ?",
-
-    {
-       
-        Buyer_ID: ID_NUMBER,
-        Buyer:name,
-        Catergory: chosenItem.Catergory,
-        Item:answer.whatYouAreBuying,
-        Price_Per_Item:chosenItem.Price_Per_Item,
-        Quantity:answer.Quantity,
-        TotalCost:roundedCost
-   
-    },
-
-
-    function (err) {
-        if (err) throw err;
-    
-    }
-    )
-
-
-    connection.query(
-        "UPDATE SalesTable SET ? WHERE Product_ID="+chosenItem.Product_ID,
-        {
-            Items_Sold: chosenItem.Items_Sold + answer.Quantity,
-            Total_Sales: chosenItem.Total_Sales + roundedCost
-        },
-
-
-        function (err) {
-            if (err) throw err;
-            console.log("You've just purchased " + answer.Quantity + " " + answer.whatYouAreBuying);
-
-
-        }
-    )
+                    var roundedCost = (Math.round(costOfPurchase * 100) / (100));
 
 
 
+                    console.log("\n\nOK you are purchasing " + answer.Quantity + " " + answer.whatYouAreBuying + " (at: $" + parseFloat(chosenItem.Price_Per_Item) + " each) for a total of $" + roundedCost);
+
+                    connection.query(
+                        "INSERT INTO Orders SET ?",
+
+                        {
+
+                            Buyer_ID: ID_NUMBER,
+                            Buyer: name,
+                            Category: chosenItem.Category,
+                            Item: answer.whatYouAreBuying,
+                            Price_Per_Item: chosenItem.Price_Per_Item,
+                            Quantity: answer.Quantity,
+                            TotalCost: roundedCost
+
+                        },
 
 
+                        function (err) {
+                            if (err) throw err;
+
+                        }
+                    )
+
+                    function receipt() {
+                        connection.query(
+                            "UPDATE SalesTable SET ? WHERE Product_ID=" + chosenItem.Product_ID,
+                            {
+
+                                Quantity_Available: chosenItem.Quantity_Available - answer.Quantity,
+                                Items_Sold: chosenItem.Items_Sold + answer.Quantity,
+                                Total_Sales: chosenItem.Total_Sales + roundedCost
+
+                            },
+
+                            function (err) {
+                                if (err) throw err;
+                                console.log("You've just purchased " + answer.Quantity + " " + answer.whatYouAreBuying + ".");
+
+
+                            }
+
+                        )
+                    }
+
+                    setTimeout(receipt, 4000)
+                    setTimeout(customerOptions, 7000)
 
 
 
 
+                }
 
 
 
-} else {
 
 
-    "You aint buying shit!"
-}
 
-});
-    });
+
+
+        })
+    })
+
 }
