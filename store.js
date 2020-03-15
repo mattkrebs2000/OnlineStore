@@ -2,7 +2,7 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 var name = "";
 var ID_NUMBER;
-var NumberOfVisits;
+
 
 
 var connection = mysql.createConnection({
@@ -22,7 +22,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    introductions()
+    introductions();
 
 });
 
@@ -59,7 +59,7 @@ function introductions() {
                     break;
 
                 case "Exit":
-                    connection.end();
+                    setTimeout(leave, 2000);
                     break;
             }
 
@@ -77,7 +77,7 @@ function managerOptions() {
         name: "managerOptions",
         type: "list",
         message: "\n\nWhat would you like to do right now?",
-        choices: ["Review Current Inventory", "Consider Restocking", "Check Sales", "Go Home"]
+        choices: ["Review Current Inventory", "Consider Restocking", "Purchase Orders", "Go Home"]
     })
 
         .then(function (answer) {
@@ -85,24 +85,52 @@ function managerOptions() {
             switch (answer.managerOptions) {
                 case "Review Current Inventory":
                     console.log("\n\nOK lets take a look to see what is on our shelves!\n\n");
-                    seeWhatsOnTheShelves();
+                    setTimeout(checkInventory, 2000)
                     break;
                 case "Consider Restocking":
-                    checkStock();
+                    setTimeout(checkStock, 2000);
                     break;
 
-
-                case "Check Sales":
-                    console.log("\n\nYour sales are as follows numbers\n\n");
+                case "Purchase Orders":
+                    console.log("\n\nOK - lets take a look at your sales.\n\n");
+                    setTimeout(checkSales, 2000);
                     break;
 
                 case "Go Home":
                     console.log("\n\nYou just got here!!")
-                    connection.end;
+
+
+                    setTimeout(leave, 2000);
+
+
 
             }
         });
 }
+function leave() {
+
+    connection.end();
+
+}
+
+function checkSales() {
+
+    var query = "SELECT * FROM Orders";
+
+    console.log("\x1b[44m%s\x1b[0m", "\n\nPurchase Orders");
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        if (res.length > 0) {
+
+            for (var i = 0; i < res.length; i++) {
+                console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+            }
+        }
+    })
+    setTimeout(managerOptions, 3000);
+}
+
+
 
 
 function customerOptions() {
@@ -130,7 +158,7 @@ function customerOptions() {
 
                 case "Go Home":
                     console.log("\n\nCome back soon!\n\n");
-                    connection.end;
+                    setTimeout(leave, 2000);
                     break;
 
             }
@@ -139,44 +167,54 @@ function customerOptions() {
 
 function purchaseHistory() {
 
-
     var query = "SELECT * FROM Orders WHERE Buyer = '" + name + "' and Buyer_ID = " + ID_NUMBER;
 
-
-
-
-    console.log("\x1b[44m%s\x1b[0m", "Your Purchase History");
+    console.log("\x1b[44m%s\x1b[0m", "\n\nYour Purchase History");
     connection.query(query, function (err, res) {
         if (err) throw err;
         if (res.length > 0) {
 
             for (var i = 0; i < res.length; i++) {
-                console.log("\x1b[44m%s\x1b[0m", res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+                console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
             }
         } else {
-            console.log("\x1b[44m%s\x1b[0m", "You haven't purchased anyting yet. ")
+            console.log("\x1b[44m%s\x1b[0m", "You haven't purchased anything yet.")
+        }
+    })
+    setTimeout(customerOptions, 6000);
+}
+
+function checkInventory() {
+
+
+    var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
+
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.log("\x1b[44m%s\x1b[0m", "\n\nItems For Sale");
+        for (var i = 0; i < res.length; i++) {
+
+            console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
         }
 
 
 
 
-    })
+    });
 
+    managerOptions();
 
-    setTimeout(customerOptions, 6000);
 }
-
-
 
 function seeWhatsOnTheShelves() {
 
     var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
-    console.log("\x1b[44m%s\x1b[0m", "Items For Sale");
+    console.log("\x1b[44m%s\x1b[0m", "\n\nItems For Sale");
     connection.query(query, function (err, res) {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
-            console.log("\x1b[44m%s\x1b[0m", res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+            console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
         }
 
 
@@ -206,8 +244,6 @@ function checkStock() {
         .then(function (answer) {
             var threshold = answer.howManyItemsOnShelves;
 
-            console.log(threshold);
-
             console.log("\n\nOK lets check to see if any of our items are below that threshold and need to be restocked.\n\n");
 
             var query = "SELECT Quantity_Available FROM SalesTable";
@@ -221,6 +257,7 @@ function checkStock() {
 
                         console.log("OK based on the threshold that you haves set you are going to need to restock.");
 
+
                         inquirer.prompt({
                             name: "maximumAmountOnShelves",
                             type: "list",
@@ -233,7 +270,7 @@ function checkStock() {
 
 
 
-                                console.log(highthreshold);
+
 
                                 console.log("\n\nOK so we won't go over " + highthreshold + ".");
 
@@ -246,10 +283,13 @@ function checkStock() {
                                     if (err) throw err;
 
 
+                                    function restock() {
+                                        console.log("\n\nOK you've restocked those items that needed it.\n\n")
+                                    }
 
-                                    console.log("\n\nOK you've restocked those items that needed it.\n\n")
+                                    setTimeout(restock, 3000);
 
-                                    customerOptions();
+                                    setTimeout(managerOptions, 6000);
                                 })
 
 
@@ -258,12 +298,17 @@ function checkStock() {
                         return false;
                     } else {
 
+
                     }
                 }
 
             })
+            function dontRestock() {
+                console.log("All of the items on your shelves are above the number that you set - so you do not need to restock.");
+            }
 
-
+            setTimeout(dontRestock, 4000);
+            setTimeout(managerOptions, 8000);
 
 
 
@@ -648,8 +693,8 @@ function shop() {
 
                     console.log("\n\nSorry we don't have enough inventory to fill this order! Please resubmit your order.\n\n")
 
-                    setTimeout(seeWhatsOnTheShelves,2500);
-                  
+                    setTimeout(seeWhatsOnTheShelves, 2500);
+
 
                 } else {
 
@@ -719,7 +764,7 @@ function shop() {
 
 
 
-        })
+            })
     })
 
 }
