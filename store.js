@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var table = require('text-table');
+var dotenv = require('dotenv')
 var name = "";
 var ID_NUMBER;
 
@@ -830,3 +831,8 @@ function shop() {
     })
 
 }
+
+const port = process.env.PORT || 3000;
+app.listen(port);
+
+module.exports = app;

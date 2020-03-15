@@ -18,6 +18,7 @@
   "homepage": "https://github.com/mattkrebs1974/OnlineStore#readme",
   "dependencies": {
     "cli-table": "^0.3.1",
+    "dotenv": "^8.2.0",
     "inquirer": "^7.0.6",
     "mysql": "^2.18.1",
     "table": "^5.4.6",
