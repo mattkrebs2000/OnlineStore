@@ -1,8 +1,16 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var table = require('text-table');
 var name = "";
 var ID_NUMBER;
 
+
+
+// var t = table([
+//     ['master', '0123456789abcdef'],
+//     ['staging', 'fedcba9876543210']
+// ]);
+// console.log(t);
 
 
 var connection = mysql.createConnection({
@@ -33,8 +41,8 @@ function introductions() {
 
         name: "introductions",
         type: "list",
-        message: "\n\nWelcome to our Online Office Store! \n\n\n Are you a Store Manager, a Customer or a Supervisor?\n\n\n",
-        choices: ["Manager", "Customer", "Supervisor", "Exit"]
+        message: "\n\nWelcome to our Online Office Store! \n\n\n Are you a Store Manager, or a Customer?\n\n\n",
+        choices: ["Manager", "Customer", "Exit"]
 
     }
 
@@ -51,11 +59,6 @@ function introductions() {
                     console.log("\n\nThank You for Visiting us today!\n");
 
                     newOrReturningCustomer();
-                    break;
-
-                case "Supervisor":
-                    console.log("\n\nThank you for checking in today!\n");
-                    // supervisorOptions();
                     break;
 
                 case "Exit":
@@ -117,14 +120,29 @@ function checkSales() {
 
     var query = "SELECT * FROM Orders";
 
-    console.log("\x1b[44m%s\x1b[0m", "\n\nPurchase Orders");
+    console.log("\x1b[44m%s\x1b[0m", "Purchase Orders");
     connection.query(query, function (err, res) {
         if (err) throw err;
         if (res.length > 0) {
 
+            var productDisplay =[['Item', 'Price_Per_Item', 'Quantity', 'Total Cost']];
+
             for (var i = 0; i < res.length; i++) {
-                console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+               
+
+                productDisplay.push([res[i].Item, res[i].Price_Per_Item, res[i].Quantity, res[i].TotalCost])
+
+
+                //Old one
+                // console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+                
             }
+            output = table(productDisplay);
+            console.log("\x1b[44m%s\x1b[0m", output)
+            
+
+
+
         }
     })
     setTimeout(managerOptions, 3000);
@@ -169,14 +187,29 @@ function purchaseHistory() {
 
     var query = "SELECT * FROM Orders WHERE Buyer = '" + name + "' and Buyer_ID = " + ID_NUMBER;
 
-    console.log("\x1b[44m%s\x1b[0m", "\n\nYour Purchase History");
+    console.log("\x1b[44m%s\x1b[0m", "Your Purchase History");
     connection.query(query, function (err, res) {
         if (err) throw err;
         if (res.length > 0) {
 
+
+
+            var productDisplay = [['Item', 'Price_Per_Item', 'Quantity', 'Total Cost']];
+
+
             for (var i = 0; i < res.length; i++) {
-                console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+              
+                productDisplay.push([res[i].Item, res[i].Price_Per_Item, res[i].Quantity, res[i].TotalCost])
+
+              //Old display
+                // console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Item + "    Item Price: $" + res[i].Price_Per_Item + "    Quantity: " + res[i].Quantity + "    Total Cost: $" + res[i].TotalCost);
+
             }
+
+            output = table(productDisplay);
+            console.log("\x1b[44m%s\x1b[0m", output)
+
+
         } else {
             console.log("\x1b[44m%s\x1b[0m", "You haven't purchased anything yet.")
         }
@@ -191,13 +224,27 @@ function checkInventory() {
 
     connection.query(query, function (err, res) {
         if (err) throw err;
-        console.log("\x1b[44m%s\x1b[0m", "\n\nItems For Sale");
+        console.log("\n\n")
+        console.log("\x1b[44m%s\x1b[0m", "Items For Sale");
+        
+        var productDisplay = [['Items_For_Sale', 'Price_Per_Item', 'Quantity_Available']];
+
+        
         for (var i = 0; i < res.length; i++) {
 
-            console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+
+            productDisplay.push([res[i].Items_For_Sale, res[i].Price_Per_Item, res[i].Quantity_Available])
+
+           
+           //Old display
+            // console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+
+
         }
 
 
+        output = table(productDisplay);
+        console.log("\x1b[44m%s\x1b[0m", output)
 
 
     });
@@ -209,13 +256,29 @@ function checkInventory() {
 function seeWhatsOnTheShelves() {
 
     var query = "SELECT Category, Items_For_Sale, Price_Per_Item, Quantity_Available FROM SalesTable";
-    console.log("\x1b[44m%s\x1b[0m", "\n\nItems For Sale");
+
+    console.log("\n\n")
+    console.log("\x1b[44m%s\x1b[0m", "Items For Sale");
     connection.query(query, function (err, res) {
         if (err) throw err;
 
+
+        var productDisplay = [['Items_For_Sale ', 'Price_Per_Item', 'Quantity_Available']];
+
+
         for (var i = 0; i < res.length; i++) {
-            console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+
+
+            productDisplay.push([res[i].Items_For_Sale, res[i].Price_Per_Item, res[i].Quantity_Available])
+
+            //Old way
+            // console.log("\x1b[44m%s\x1b[0m", "\n" + res[i].Items_For_Sale + "        Price: $" + res[i].Price_Per_Item + "        Quantity Available: " + res[i].Quantity_Available);
+
+
         }
+
+        output = table(productDisplay);
+        console.log("\x1b[44m%s\x1b[0m", output)
 
 
         shop();
